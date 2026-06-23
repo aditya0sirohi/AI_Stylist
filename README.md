@@ -183,55 +183,6 @@ The system will:
 * Explain the styling rationale
 
 ---
-
-## Backend Template
-
-The `backend/` directory contains a FastAPI starter project with MongoDB integration.
-
-### Included
-
-* FastAPI
-* Motor (async MongoDB driver)
-* Pydantic validation
-* CORS support
-* Sample API endpoints
-* Environment-based configuration
-
-### Run
-
-```bash
-cd backend
-
-pip install -r requirements.txt
-
-export MONGO_URL="mongodb://localhost:27017"
-export DB_NAME="ai_stylist"
-
-uvicorn server:app --reload
-```
-
-API documentation:
-
-```
-http://localhost:8000/docs
-```
-
----
-
-## Frontend Scaffold
-
-The `frontend/` directory contains a React and Tailwind setup intended for future development.
-
-Current status:
-
-* React application scaffold
-* Tailwind configuration
-* shadcn/ui setup
-
-No application-specific features have been implemented yet.
-
----
-
 ## Current Limitations
 
 ### Dataset Size
