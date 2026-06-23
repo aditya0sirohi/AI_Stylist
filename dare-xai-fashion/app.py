@@ -1,16 +1,9 @@
-"""
-app.py
-Streamlit UI for the AI Fashion Outfit Recommendation System.
-Keeps state in st.session_state, talks to src/* for the heavy lifting.
-"""
-
 import os
 import sys
 
 import streamlit as st
 from langchain.memory import ConversationBufferMemory
 
-# make `src` importable when running `streamlit run app.py`
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from src.utils import load_products, load_outfits
@@ -20,7 +13,6 @@ from src.llm import extract_intent, generate_explanation
 from src.recommender import recommend
 
 
-# ----------------------------- config -----------------------------------
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 PRODUCTS_CSV = os.path.join(DATA_DIR, "products.csv")
 OUTFITS_CSV = os.path.join(DATA_DIR, "outfits.csv")
@@ -33,11 +25,8 @@ st.set_page_config(
 )
 
 
-# ----------------------------- caching ----------------------------------
-# Streamlit re-runs the whole script on every interaction, so we cache
-# the expensive loads behind @st.cache_resource (kept across sessions).
 @st.cache_resource(show_spinner="Loading products and building embeddings...")
-def bootstrap():
+def load_data():
     products_df = load_products(PRODUCTS_CSV)
     outfits_df = load_outfits(OUTFITS_CSV)
     embeddings = embed_products(products_df)
@@ -46,18 +35,15 @@ def bootstrap():
     return products_df, outfits_df, index, compat_map
 
 
-products_df, outfits_df, faiss_index, compat_map = bootstrap()
+products_df, outfits_df, faiss_index, compat_map = load_data()
 
 
-# ----------------------------- session init -----------------------------
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "memory" not in st.session_state:
-    # LangChain memory — we only really use this to show "we used LangChain".
     st.session_state.memory = ConversationBufferMemory(return_messages=True)
 
 
-# ----------------------------- sidebar profile --------------------------
 with st.sidebar:
     st.markdown("### Your Style Profile")
     name = st.text_input("Name", value="Friend", key="profile_name")
@@ -75,8 +61,7 @@ with st.sidebar:
     )
 
     st.markdown("---")
-    st.caption(f"Catalog: **{len(products_df)}** products, "
-               f"**{len(outfits_df)}** curated outfits")
+    st.caption(f"Catalog: {len(products_df)} items, {len(outfits_df)} outfits")
 
     if st.button("Clear chat", use_container_width=True):
         st.session_state.messages = []
@@ -93,12 +78,10 @@ profile = {
 }
 
 
-# ----------------------------- header -----------------------------------
 st.title("AI Fashion Stylist")
 st.caption("Tell me where you're going — I'll put together a complete outfit.")
 
 
-# ----------------------------- chat history -----------------------------
 def render_cards(cards):
     if not cards:
         return
@@ -114,28 +97,24 @@ def render_cards(cards):
             st.caption(f"_{card['category_label']} · {card['occasion']}_")
 
 
-# replay existing messages
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
         if msg.get("cards"):
             render_cards(msg["cards"])
         if msg.get("rationale"):
-            with st.expander("Stylist rationale (from curated outfit)"):
+            with st.expander("Stylist rationale"):
                 st.write(msg["rationale"])
 
 
-# ----------------------------- chat input -------------------------------
-user_input = st.chat_input("e.g. I need an outfit for a business meeting tomorrow")
+user_input = st.chat_input("e.g. I need an outfit for a business meeting")
 
 if user_input:
-    # 1) show user message
     st.session_state.messages.append({"role": "user", "content": user_input})
     st.session_state.memory.chat_memory.add_user_message(user_input)
     with st.chat_message("user"):
         st.markdown(user_input)
 
-    # 2) extract intent + recommend
     with st.chat_message("assistant"):
         with st.spinner("Putting together your outfit..."):
             intent = extract_intent(user_input)
@@ -159,7 +138,7 @@ if user_input:
         st.markdown(explanation)
         render_cards(result["cards"])
         if result.get("rationale"):
-            with st.expander("Stylist rationale (from curated outfit)"):
+            with st.expander("Stylist rationale"):
                 st.write(result["rationale"])
 
     st.session_state.memory.chat_memory.add_ai_message(explanation)
