@@ -1,0 +1,11 @@
+streamlit
+pandas
+numpy
+faiss-cpu
+sentence-transformers
+langchain
+langchain-google-genai
+google-generativeai
+Pillow
+openpyxl
+emergentintegrations
