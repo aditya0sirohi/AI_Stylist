@@ -1,149 +1,227 @@
 # AI Stylist
 
-AI Stylist is a fashion recommendation system that generates complete outfit suggestions from natural language requests. The project was built as part of an internship assignment and combines semantic search, curated outfit mappings, and large language models to produce explainable outfit recommendations.
+AI Stylist is an AI-powered fashion recommendation system that suggests complete outfits based on user preferences, occasion, and natural language requests.
 
-The repository also contains optional backend and frontend scaffolding for future expansion.
+The project combines semantic search, curated outfit compatibility data, and large language models to generate explainable outfit recommendations through a conversational interface.
+
+Developed as part of the Dare XAI Machine Learning & AI Engineer Internship Assignment.
 
 ---
 
 ## Repository Structure
 
-```
-AI-Stylist/
+```text
+dare-xai-fashion/
 │
-├── dare-xai-fashion/      # Main application
-├── backend/               # FastAPI + MongoDB template
-├── frontend/              # React + Tailwind scaffold
-└── memory/PRD.md          # Project requirements and design notes
+├── data/
+│   ├── products.csv
+│   ├── outfits.csv
+│   └── images/
+│
+├── src/
+│   ├── compatibility.py
+│   ├── embeddings.py
+│   ├── llm.py
+│   ├── recommender.py
+│   └── utils.py
+│
+├── app.py
+├── architecture.md
+├── requirements.txt
+│
+├── README.md
+└── SETUP.md
 ```
 
 ---
 
-## Main Project: AI Fashion Outfit Recommendation System
+## Overview
 
-The primary application is located in `dare-xai-fashion/`.
+The system recommends stylist-curated outfits rather than individual products.
 
-### Overview
+A user provides:
 
-The system recommends complete outfits based on:
-
-* User profile information
+* Gender
+* Age
 * Occasion
-* Style preferences
-* Natural language requests
+* Style preference
+* Natural language request
 
-Rather than recommending isolated products, the application retrieves stylist-curated outfits consisting of clothing, footwear, and accessories that are known to work together.
+Example:
 
-### Features
+```text
+I need an outfit for a beach party next weekend.
+```
+
+The application identifies the user's intent, retrieves the most relevant outfit from the catalog, and generates a styling explanation.
+
+---
+
+## Features
 
 * Conversational outfit recommendations
 * Semantic search using vector embeddings
+* Occasion-aware outfit selection
 * Curated outfit compatibility mapping
-* Occasion-aware recommendations
-* Personalized styling explanations
+* LLM-powered intent extraction
+* AI-generated styling explanations
 * Interactive Streamlit interface
-* Product image display
+* Product image support
 
 ---
 
 ## System Architecture
 
-```
+### High-Level Flow
+
+```text
 User Request
       │
       ▼
-Gemini Intent Extraction
+Intent Extraction (LLM)
       │
       ▼
-Catalog Filtering
+Semantic Retrieval
       │
       ▼
-Sentence Embeddings
+Outfit Assembly
       │
       ▼
-FAISS Similarity Search
+Explanation Generation
       │
       ▼
-Outfit Compatibility Lookup
-      │
-      ▼
-Gemini Explanation Generation
-      │
-      ▼
-Streamlit Response
+UI Rendering
 ```
 
-### Recommendation Pipeline
+### Module-Level Architecture
 
-1. User provides profile information:
+```text
+User
+ │
+ ▼
+app.py
+ │
+ ▼
+llm.py
+(Intent Extraction)
+ │
+ ▼
+recommender.py
+ │
+ ├── embeddings.py
+ │      ├─ Sentence Transformers
+ │      └─ FAISS Search
+ │
+ └── compatibility.py
+        └─ Outfit Matching Logic
+ │
+ ▼
+llm.py
+(Styling Explanation)
+ │
+ ▼
+app.py
+(Display Results)
+```
 
-   * Gender
-   * Age
-   * Occasion
-   * Preferred style
+---
 
-2. User submits a natural language request.
+## Recommendation Pipeline
 
-3. Gemini extracts structured intent information from the query.
+### 1. User Input
 
-4. Relevant products are filtered from the catalog.
+The user provides profile information through the Streamlit sidebar and enters a request in the chat interface.
 
-5. Query embeddings are generated using Sentence Transformers.
+### 2. Intent Extraction
 
-6. FAISS retrieves the closest matching hero item.
+`llm.py` uses Gemini to extract structured information such as:
 
-7. The outfit compatibility map is used to assemble the complete outfit.
+* Occasion
+* Style preference
+* Gender hints
+* Relevant keywords
 
-8. Gemini generates a natural language explanation describing why the recommendation works.
+### 3. Product Retrieval
+
+`embeddings.py` converts the query into an embedding using:
+
+```text
+all-MiniLM-L6-v2
+```
+
+The embedding is searched against a FAISS index to find the most relevant products.
+
+### 4. Outfit Construction
+
+`compatibility.py` retrieves the complete outfit associated with the selected hero item using curated outfit mappings from `outfits.csv`.
+
+### 5. Explanation Generation
+
+Gemini generates a concise explanation describing why the outfit fits the user's request.
+
+### 6. Presentation
+
+`app.py` displays:
+
+* Recommended products
+* Product images
+* Outfit details
+* Styling rationale
 
 ---
 
 ## Technology Stack
 
-| Component           | Technology                                 |
-| ------------------- | ------------------------------------------ |
-| UI                  | Streamlit                                  |
-| Embeddings          | Sentence Transformers (`all-MiniLM-L6-v2`) |
-| Vector Search       | FAISS                                      |
-| LLM                 | Gemini 2.5 Flash                           |
-| Conversation Memory | LangChain                                  |
-| Data Processing     | Pandas                                     |
+| Component           | Technology            |
+| ------------------- | --------------------- |
+| Frontend            | Streamlit             |
+| Embeddings          | Sentence Transformers |
+| Embedding Model     | all-MiniLM-L6-v2      |
+| Vector Search       | FAISS                 |
+| LLM                 | Gemini 2.5 Flash      |
+| Conversation Memory | LangChain             |
+| Data Processing     | Pandas                |
 
 ---
 
 ## Dataset
 
-The project uses a small curated fashion dataset consisting of:
+The project uses a curated fashion dataset consisting of:
 
-| File           | Description                         |
-| -------------- | ----------------------------------- |
-| `products.csv` | Product catalog                     |
-| `outfits.csv`  | Stylist-curated outfit combinations |
-| `images/`      | Product images                      |
+| File         | Description                         |
+| ------------ | ----------------------------------- |
+| products.csv | Product catalog                     |
+| outfits.csv  | Stylist-curated outfit combinations |
+| images/      | Product images                      |
 
 Current dataset size:
 
-* 68 fashion products
+* 68 products
 * 25 curated outfits
 
 ---
 
-## Running the Application
+## Installation
 
 ### Prerequisites
 
 * Python 3.9+
-* Gemini API key or Emergent Universal LLM key
+* Gemini API Key or Emergent Universal LLM Key
 
-### Installation
+### Clone Repository
 
 ```bash
+git clone <repository-url>
 cd dare-xai-fashion
+```
 
+### Install Dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-### Environment Variables
+### Configure Environment Variables
 
 ```bash
 export EMERGENT_LLM_KEY="your-key"
@@ -155,15 +233,15 @@ or
 export GEMINI_API_KEY="your-key"
 ```
 
-### Start the Application
+### Run Application
 
 ```bash
 streamlit run app.py
 ```
 
-The application will be available at:
+Open:
 
-```
+```text
 http://localhost:8501
 ```
 
@@ -171,63 +249,84 @@ http://localhost:8501
 
 ## Example Query
 
-```
-I need an outfit for a beach party next weekend.
+```text
+I need something formal for a wedding reception.
 ```
 
-The system will:
+### Example Workflow
 
-* Identify the occasion
-* Retrieve the most relevant outfit
-* Display recommended items
-* Explain the styling rationale
+```text
+User Query
+     │
+     ▼
+Extract Intent
+     │
+     ▼
+Generate Embedding
+     │
+     ▼
+Search FAISS Index
+     │
+     ▼
+Select Hero Product
+     │
+     ▼
+Retrieve Matching Outfit
+     │
+     ▼
+Generate Styling Explanation
+     │
+     ▼
+Display Recommendation
+```
 
 ---
+
 ## Current Limitations
 
-### Dataset Size
+### Limited Dataset
 
-The recommendation quality is constrained by the limited number of products and curated outfits.
+The recommendation quality depends heavily on the available catalog and curated outfit combinations.
 
-### Text-Only Retrieval
+### Text-Based Retrieval
 
-Similarity search relies entirely on product metadata and descriptions. Visual similarity between products is not considered.
+Recommendations are based on metadata and textual descriptions rather than visual similarity.
 
-### Session-Based Memory
+### Session Memory Only
 
-Conversation history is stored only for the active Streamlit session and is lost after refresh.
+Conversation history exists only for the active Streamlit session and is not persisted.
 
-### Scalability
+### Small-Scale Retrieval
 
-FAISS `IndexFlatL2` works well for small catalogs but is not ideal for large-scale production inventories.
+FAISS IndexFlatL2 works well for small catalogs but would require replacement for significantly larger inventories.
 
 ---
 
 ## Future Improvements
 
-* Multimodal retrieval using CLIP or FashionCLIP
-* Qdrant or Milvus for large-scale vector search
-* User feedback collection and reranking
+* FashionCLIP or CLIP-based multimodal retrieval
+* Qdrant or Milvus vector database integration
+* User feedback and preference learning
 * Expanded fashion catalog
-* User authentication and profile persistence
-* Cloud deployment
+* Persistent user profiles
 * Recommendation analytics
-* Inventory-aware recommendations
+* Cloud deployment
+* Personalized outfit history
 
 ---
 
-## Design Decisions
+## Design Choices
 
 This project intentionally combines:
 
-* LLMs for understanding user intent
-* Embeddings for semantic retrieval
-* Curated stylist knowledge for compatibility
+* LLMs for intent understanding
+* Vector search for semantic retrieval
+* Curated outfit mappings for compatibility
 
-The goal is to avoid purely generative recommendations and instead ground responses in outfit combinations that have been explicitly curated.
+Instead of generating outfits entirely through an LLM, recommendations are grounded in stylist-approved outfit combinations, helping maintain consistency and compatibility.
 
 ---
 
 ## License
 
-No license has been specified for this repository.
+No license has been specified for this project.
