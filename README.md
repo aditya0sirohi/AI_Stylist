@@ -281,6 +281,13 @@ Display Recommendation
 ```
 
 ---
+---
+## Demo:-
+<img width="1568" height="816" alt="image-1(1)" src="https://github.com/user-attachments/assets/ec36e9ad-b922-4745-8ae5-d7ff23e71c2c" />
+<img width="1568" height="816" alt="image-1" src="https://github.com/user-attachments/assets/7db74d29-e327-40ec-9212-fc8fcf4a71aa" />
+
+
+---
 
 ## Current Limitations
 
