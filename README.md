@@ -224,12 +224,6 @@ pip install -r requirements.txt
 ### Configure Environment Variables
 
 ```bash
-export EMERGENT_LLM_KEY="your-key"
-```
-
-or
-
-```bash
 export GEMINI_API_KEY="your-key"
 ```
 
